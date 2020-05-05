@@ -1,6 +1,6 @@
 library(lidR)
-source('https://raw.githubusercontent.com/mosscoder/lidR_supplements/master/las_helper_functions.R')
-
+#source('https://raw.githubusercontent.com/mosscoder/lidR_supplements/master/las_helper_functions.R')
+source('~/mpgPostdoc/projects/bareEarth/analysis/support/las_helper_functions.R')
 setwd('~/Downloads')
 
 set_lidr_threads(1L)
@@ -14,11 +14,11 @@ download.file(url = 'https://storage.googleapis.com/mpg-files/classified_example
 
 ctg <- catalog(unzip(t)[1])
 
-buffer <- 30
+buffer <- 200
 res <- 0.2
 
 opt_chunk_buffer(ctg) <- buffer
-opt_chunk_size(ctg) <- 200
+opt_chunk_size(ctg) <- 100
 opt_stop_early(ctg) <- TRUE
 opt_select(ctg) <- 'xyzc'
 opt_output_files(ctg) <- './bicubic/{XLEFT}_{YBOTTOM}_{ID}'
