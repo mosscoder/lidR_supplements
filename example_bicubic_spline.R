@@ -3,6 +3,10 @@ source('https://raw.githubusercontent.com/mosscoder/lidR_supplements/master/las_
 
 setwd('~/Downloads')
 
+set_lidr_threads(1L)
+data.table::setDTthreads(1L)
+plan('multisession', workers = 4L)
+
 t <- tempfile()
 
 download.file(url = 'https://storage.googleapis.com/mpg-files/classified_example.las.zip',
@@ -19,10 +23,6 @@ opt_stop_early(ctg) <- TRUE
 opt_select(ctg) <- 'xyzc'
 opt_output_files(ctg) <- './bicubic/{XLEFT}_{YBOTTOM}_{ID}'
 
-set_lidr_threads(1L)
-data.table::setDTthreads(1L)
-plan('multisession', workers = 4L)
-
 opt <- list(raster_alignment = res,
             automerge = TRUE)
 
@@ -32,4 +32,5 @@ dtm <- catalog_apply(ctg,
               res = res, 
               .options = opt)
 
-hillPlot(dtm)
+hillPlot(readLAS(ctg@data$filename), main = 'TIN interpolation') 
+hillPlot(dtm, main = 'Bicubic spline interpolation') 
