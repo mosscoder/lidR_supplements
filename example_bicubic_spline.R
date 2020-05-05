@@ -1,5 +1,5 @@
 library(lidR)
-source('~/mpgPostdoc/projects/bareEarth/analysis/support/las_helper_functions.R')
+source('https://raw.githubusercontent.com/mosscoder/lidR_supplements/master/las_helper_functions.R')
 
 setwd('~/Downloads')
 
