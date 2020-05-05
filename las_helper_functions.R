@@ -278,8 +278,6 @@ bicubicSplineInterp <- function(cluster, res, buffer) {
   )
   
   interp <- raster(paste0(dir, '/interp.sdat'))
-  template <- raster(bufferedExtent, resolution = 0.2, crs = crs(las))
-  interp <- resample(interp, template)
   interp <- raster::crop(interp, bbox)
   unlink(dir, recursive=TRUE)
   
