@@ -199,7 +199,7 @@ flipGroundOutliers <- function(las, k = 100, cutoff = 0.5, plotDumpers = TRUE, b
     data = gDat[, c('X', 'Y')],
     query = gDat[, c('X', 'Y')],
     k = k,
-    searchtype = 'priority',
+    searchtype = 'standard',
     treetype = 'kd'
   )$nn.idx[,-1]
   
@@ -240,7 +240,35 @@ flipGroundOutliers <- function(las, k = 100, cutoff = 0.5, plotDumpers = TRUE, b
   
 }
 
-bicubicSplineInterp <- function(cluster, res, buffer) {
+bicubicSplineInterp <- function(cluster, res, h = 12, zDecimals = 2) {
+  las <- readLAS(cluster)
+  if (is.empty(las))
+    return(NULL)
+  
+  bbox  <- raster::extent(cluster)
+  bufferedExtent <- raster::extent(las)
+  
+  template <- raster(bufferedExtent, crs = crs(las), res = res)
+  
+  interp <- mba.surf(xyz = las@data[,c('X', 'Y', 'Z')], 
+           no.X = nrow(template),
+           no.Y = ncol(template),
+           h = h,
+           extend = TRUE
+           )$xyz.est$z
+  
+  interp <- raster(apply(interp, 1, rev))
+  
+  extent(interp) <- extent(template)
+  crs(interp) <- crs(template)
+  
+  interp <- raster::crop(interp, bbox)
+  
+  return(interp)
+  
+}
+
+depracatedSAGAbicubic <- function(cluster, res, buffer) {
   las <- readLAS(cluster)
   if (is.empty(las))
     return(NULL)
@@ -250,16 +278,11 @@ bicubicSplineInterp <- function(cluster, res, buffer) {
   
   dir <- paste0(tempdir(), '/', bbox[1], '_', bbox[3])
   dir.create(dir)
-  
-  xyz <-lasfilter(las,
-                  Classification == 2L)@data[ , c('X', 'Y', 'Z')] 
-  xyz <- st_as_sf(as.data.frame(xyz), 
-                  coords = c('X', 'Y'), 
-                  crs = crs(las))
   point_dir <- paste0(dir, "/irr_pts.shp")
-  st_write(xyz, point_dir, driver = "ESRI Shapefile", overwrite = TRUE)
-  
   ras_dir <- paste0(dir, '/interp.sgrd')
+  
+  xyz <- as.spatial(las)
+  shapefile(xyz, point_dir, overwrite = TRUE)
   
   system(
     paste0(
@@ -279,10 +302,12 @@ bicubicSplineInterp <- function(cluster, res, buffer) {
   
   interp <- raster(paste0(dir, '/interp.sdat'))
   template <- raster(bufferedExtent, crs = crs(las), res = res)
-  raster::values(template) <- raster::values(interp)
-  interp <- raster::crop(template, bbox)
+  interp <- projectRaster(from = interp, to = template)
+  interp <- raster::crop(interp, bbox)
   unlink(dir, recursive=TRUE)
   
   return(interp)
   
 }
+
+
