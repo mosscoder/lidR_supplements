@@ -3,7 +3,6 @@ library(MBA)
 library(future)
 
 source('https://raw.githubusercontent.com/mosscoder/lidR_supplements/master/las_helper_functions.R')
-setwd('~/Downloads')
 
 set_lidr_threads(1L)
 plan('multisession', workers = 4L)
