@@ -268,6 +268,21 @@ bicubicSplineInterp <- function(cluster, res, h = 12, zDecimals = 2) {
   
 }
 
+mba <- function(n = 1, m = 1, h = 12, extend = TRUE)
+{
+  n <- lazyeval::uq(n)
+  m <- lazyeval::uq(m)
+  h <- lazyeval::uq(h)
+  extend <- lazyeval::uq(extend)
+  
+  f = function(what, where, scales = c(0,0), offsets = c(0,0))  {
+    return(MBA::mba.points(what, where, n, m , h, extend)$xyz.est[,3])
+  }
+  
+  class(f) <- c("SpatialInterpolation", "Algorithm", "lidR", "function")
+  return(f)
+}
+
 depracatedSAGAbicubic <- function(cluster, res, buffer) {
   las <- readLAS(cluster)
   if (is.empty(las))
